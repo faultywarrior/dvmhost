@@ -17,6 +17,8 @@ This project utilizes CMake for its build system. (All following information ass
 
 The DVM Host software requires the library dependancies below. Generally, the software attempts to be as portable as possible and as library-free as possible. A basic GCC/G++ install, with libasio and ncurses is usually all that is needed to compile.
 
+If building on Windows, you will need Visual Studio 2022 installed and configured for Visual C++ and Visual C++/CLI application building, along with Linux cross-platform development.
+
 ### Dependencies
 
 `apt-get install libasio-dev libncurses-dev libssl-dev`
@@ -34,7 +36,9 @@ sudo apt-get update
 sudo apt-get install libasio-dev:arm64 libncurses-dev:arm64 libssl-dev:arm64
 ```
 
-### Build Instructions
+Note that when building on Windows, either ncurses nor OpenSSL are used, and ASIO is automatically fetched by CMake; so you do not need to manually install any dependancies.
+
+### Building on Linux
 
 1. Clone the repository. `git clone https://github.com/DVMProject/dvmhost.git`
 2. Switch into the "dvmhost" folder. Create a new folder named "build" and switch into it.
@@ -57,7 +61,25 @@ If cross-compiling is required (for either ARM 32bit, 64bit or old Raspberry Pi 
 - `-DCROSS_COMPILE_AARCH64=1` - This will cross-compile dvmhost for generic ARM 64bit. (RPi4 running 64-bit distro's can fall into this category [on Debian/Rasbpian anything bullseye or newer])
 - `-DCROSS_COMPILE_RPI_ARM=1` - This will cross-compile for old Raspberry Pi ARM 32 bit. (typically this will be the RPi1, 2 and 3 platforms; see build notes, linked below)
 
-Please note cross-compliation requires you to have the appropriate development packages installed for your system. For ARM 32-bit, on Debian/Ubuntu OS install the "arm-linux-gnueabihf-gcc" and "arm-linux-gnueabihf-g++" packages. For ARM 64-bit, on Debian/Ubuntu OS install the "aarch64-linux-gnu-gcc" and "aarch64-linux-gnu-g++" packages.
+Please note cross-compliation requires you to have the appropriate development packages installed for your system. For ARM 32-bit, on Debian/Ubuntu OS install the "arm-linux-gnueabihf-gcc" and "arm-linux-gnueabihf-g++" packages. For ARM 64-bit, on Debian/Ubuntu OS install the "aarch64-linux-gnu-gcc" and "aarch64-linux-gnu-g++" packages.  Additionally, cross-compilation for ARM/AARCH64 on Windows is NOT supported!
+
+### Building on Windows
+ 1. Clone the repository. `git clone https://github.com/DVMProject/dvmhost.git`
+ 2. Switch into the "dvmhost" folder. Create a new folder named "build" and switch into it.
+    ```
+    # cd dvmhost
+    dvmhost # mkdir build
+    dvmhost # cd build
+    ```
+ 3. Run CMake with any specific options required. (Where [options] is any various compilation options you require.)
+    ```
+    dvmhost/build # cmake -DCOMPILE_WIN32=1 [additional options] ..
+    ...
+    -- Build files have been written to: dvmhost/build
+    dvmhost/build # make
+    ```
+
+If you want to build for Win32 instead of Win64, you must pass CMake `-A Win32`
 
 [See project notes](#project-notes).
 
@@ -286,7 +308,7 @@ The steps above can be done by the following commands:
 
 ```shell
 sudo systemctl disable bluetooth.service serial-getty@ttyAMA0.service
-sudo systemctl mask serial-getty@ttyAMA0.service
+sudo systemctl mask bluetooth.service serial-getty@ttyAMA0.service
 grep '^dtoverlay=disable-bt' /boot/config.txt || echo 'dtoverlay=disable-bt' | sudo tee -a /boot/config.txt
 sudo sed -i 's/^console=serial0,115200 *//' /boot/cmdline.txt
 ```
